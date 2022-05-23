@@ -69,7 +69,7 @@ After filtering, convert type_1 and legendary to factors.
 count = table(pokemon$type_1)
 count
 barplot(count, main="Pokemon Type 1", 
-        xlaby="the type_1 of pokemon", ylab="the number of pokemon", 
+        xlab = "the type_1 of pokemon", ylab="the number of pokemon", 
         width = 1, cex.names = 0.3)
 ```
 
@@ -150,9 +150,9 @@ pokemon_folds
 ```
 We are trying to use v-fold cross-validation and divide the testing data into 5 groups of roughly equal size to prepare for the later fitting and prediction process. 
 
-v-fold cross-validation is one kind of resampling method. For each model, this method will randomly divide the observation data into v groups of roughly equal sizes, which are folds. This method will hold out the 1st fold as the validation set to be evaluated. Then the remaining k-1 folds will be analyzed to fit the model. The final estimate of model will get by the average of k results.
+v-fold cross-validation is one kind of resampling method. For each model, this method will randomly divide the observation data into v groups of roughly equal sizes, which are folds. This method will hold out the 1st fold as the validation set to be evaluated. Then the remaining v-1 folds will be analyzed to fit the model. The final estimate of model will get by the average of v results.
 
-Thus, it is useful to make sure the distribution of types in each fold is balanced with the entire data set.
+Thus, it is useful to make sure the distribution of types in each fold is balanced with the entire data set for the later better prediction.
 
 
 
@@ -201,6 +201,7 @@ pokemon_workflow <- workflow() %>%
 # Create a regular grid 
 pokemon_grid <- grid_regular(penalty(range = c(-5, 5)), mixture(range = c(0, 1)), 
                              levels = c(10, 10))
+pokemon_grid 
 ```
 
 500 models in total will be fitting to the data. There are 5 folds and 100 models I will fit to each fold, so total number is 5*100=500. 
@@ -226,6 +227,8 @@ pokemon_tune_res <- tune_grid(pokemon_workflow,
 autoplot(pokemon_tune_res)
 ```
 What do you notice? Do larger or smaller values of penalty and mixture produce better accuracy and ROC AUC?
+
+
 From the graph above, we can find that with the value of penalty and mixture get larger, the value of accuracy and roc_auc become smaller. Thus, The smaller values of penalty and mixture produce better accuracy and ROC AUC. 
 
 
@@ -238,6 +241,7 @@ Use select_best() to choose the model that has the optimal roc_auc. Then use fin
 ```{r}
 # Use select_best() to choose the model that has the optimal roc_auc.
 optimal_auc <- select_best(pokemon_tune_res, metric = "roc_auc")
+optimal_auc
 
 # use finalize_workflow(), fit(), and augment() to fit the model to the training set and evaluate its performance on the testing set.
 pokemon_final <- finalize_workflow(pokemon_workflow, optimal_auc)
